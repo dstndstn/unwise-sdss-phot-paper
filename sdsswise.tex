@@ -1,6 +1,11 @@
 % Copyright 2014 Dustin Lang (CMU), David W. Hogg (NYU) and David J. Schlegel (LBL).
 % All rights reserved.
 
+% To-do: Subject heading for specific survey - WISE, SDSS
+% -Myers et al in prep is published now, right?
+% -Prakash et al?
+% -DiPompeo et al?
+
 % To-do: say something clever for @OverheardOnAph
 
 % When published to-do:
@@ -70,7 +75,7 @@
   200 University Avenue West,
   Waterloo, ON, N2L 3G1, Canada}
 \altaffiltext{3}%
-{To whom correspondence should be addressed: dstn@cmu.edu}
+{To whom correspondence should be addressed: dstndstn@gmail.com}
 \altaffiltext{4}%
 {Center for Cosmology and Particle Physics,
  Department of Physics, New York University,
@@ -107,7 +112,8 @@ The result is a measurement of the flux of each SDSS source in each
 WISE band.  Many sources have little flux in the WISE bands, so often
 the measurements we report are consistent with zero.  However, for
 many sources we get three- or four-sigma measurements; these sources
-would not be reported by the WISE pipeline and will not appear in the
+would not be reported by the ``official'' WISE pipeline and will not
+appear in the
 WISE catalog, yet they can be highly informative for some scientific
 questions.  In addition, these small-signal measurements can be used
 in \emph{stacking} analyses at catalog level.  The forced photometry
@@ -260,9 +266,10 @@ calibration and all the parameters of the sources in the images
 (positions, shapes, and fluxes).  In forced photometry mode, the image
 calibration parameters are frozen (held fixed), as are all properties of the
 sources except for their fluxes in the bands of interest.  In this
-case, the photometry task becomes linear: We know what each source
-should look like in the WISE images, and we must compute the linear
-sum of the sources that best matches the observed image.
+case, the photometry task becomes a linear optimization problem:
+We know what each source
+should look like in the WISE images, and we must compute the linear scalings
+of the sources that best match the observed image.
 
 
 The image calibration parameters include the astrometric calibration,
@@ -438,11 +445,14 @@ galaxies).  Examples of sources we treat as point sources are shown in
 \figref{fig:ptsrc}.
 
 
-For each WISE tile, we keep SDSS sources that are within the tile plus
+For each WISE tile, we keep SDSS sources that are within the astrometric
+footprint of the tile plus
 a margin of $20$ WISE pixels (55 arcseconds).  We also include in the
 fitting sources that are detected in the AllWISE Release catalog but
 not SDSS; we keep WISE catalog sources that have no SDSS match within
-$4$ arcseconds.
+$4$ arcseconds.  We include these WISE-only sources in the fitting to
+avoid biasing the fits for the SDSS sources.
+
 %  Later, we ``resolve'' the duplicate measurements that
 %result due to the tile overlaps and margins, keeping only one copy of
 %each SDSS source.
@@ -477,8 +487,8 @@ catalogs are described in Appendix \ref{sec:catalog}.
 
 \section{Results}
 
-We photometered a total of $7,989$ WISE tiles, covering roughly
-$14,900$ square degrees and containing roughly $469$ million SDSS
+We photometered a total of $7,\!989$ WISE tiles, covering roughly
+$14,\!900$ square degrees and containing roughly $469$ million SDSS
 sources.  The AllWISE catalog contains roughly $240$ million sources
 in the same area.  Of the $469$ million sources photometered, we
 treated $430$ million as point sources and $34$ million as galaxies.
@@ -585,7 +595,7 @@ W3 & W4 \\
   \includegraphics[width=0.48\textwidth]{density-07}
 \end{tabular}
 \end{center}
-\caption{Comparison of our forced photometry magnitudes and WISE
+\caption{Comparison of our forced photometry and WISE
   AllWISE Release signal-to-noise distributions.  \textbf{Top-left}:
   W1.  Since WISE is most sensitive in W1, the AllWISE catalog is
   essentially W1-selected.  As a result, the W1 measurements rise
