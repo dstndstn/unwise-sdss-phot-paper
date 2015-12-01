@@ -274,13 +274,13 @@ of the sources that best match the observed image.
 
 The image calibration parameters include the astrometric calibration,
 described by a World Coordinate System (WCS); the photometric
-calibration, described by a zeropoint; a point-spread function model;
+calibration, described by a zeropoint; a point-spread function model (described below);
 a noise model (per-pixel error estimates); and a ``sky'' or background
 model.  We are photometering the ``unWISE'' coadds, which are tiles of
 roughly $1.5^\circ \times 1.5^\circ$ in extent.  The tiles use a
 gnomonic projection (tangent plane; WCS code ``TAN''), are
 sky-subtracted, and have a photometric zeropoint of $22.5$ in the Vega
-system.  In turn, these coadds use the ``level 1b'' calibrated
+system.  In turn, these coadds are built from the ``level 1b'' calibrated
 individual exposures from the WISE All-Sky Data Release.  
 %
 We use the WISE PSF models from the WISE All-Sky
@@ -825,9 +825,18 @@ individual frames.  While in general it would be preferable to
 photometer the individual frames (at least in principle), the WISE
 images have a stable and approximately isotropic PSF with little
 variation over the focal plane, so little information is lost in the
-coadding process.  The computational time and memory requirements
+coadding process.  The compute time and memory requirements
 scale roughly with the number of pixels being fit, so photometering
 the individual frames would have cost roughly 30 times more.
+%
+In order to explore this decision, we ran forced photometry on the
+collection of L1b frames for a sample tile, and found that the
+differences in forced photometry measurements were smaller than the
+formal errors, and approximately constant across a range of fluxes.
+We attribute these differences to the ``patching'' step in building
+the unWISE coadds, which naively fills in masked values in the L1b
+images with an average of neighboring unmasked pixels.
+
 
 Forced photometry assumes that the profile of a galaxy is the same
 between bands.  This does not describe the (typically small) color
