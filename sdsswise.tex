@@ -63,7 +63,7 @@
 \begin{document}
 
 \title{WISE photometry for 400 million SDSS sources}
-\author{
+\author{%
   Dustin~Lang\altaffilmark{1,2,3},
   David~W.~Hogg\altaffilmark{4,5},
   David~J.~Schlegel\altaffilmark{6}}
@@ -76,7 +76,7 @@
 %  5000 Forbes Ave, Pittsburgh, PA, 15213, USA}
 {Department of Astronomy \& Astrophysics and Dunlap Institute,
   University of Toronto,
-  50 St.~George Street, Toronto, ON, N2L2G5, Canada}
+  50 Saint George Street, Toronto, ON, M5S 3H4, Canada}
 \altaffiltext{2}%
 {Department of Physics \& Astronomy,
   University of Waterloo,
@@ -852,12 +852,17 @@ scale roughly with the number of pixels being fit, so photometering
 the individual frames would have cost roughly 30 times more.
 %
 In order to explore this decision, we ran forced photometry on the
-collection of L1b frames for a sample tile, and found that the
-differences in forced photometry measurements were smaller than the
-formal errors, and approximately constant across a range of fluxes.
-We attribute these differences to the ``patching'' step in building
-the unWISE coadds, which naively fills in masked values in the L1b
-images with an average of neighboring unmasked pixels.
+full set of L1b frames for a sample tile, and found that the
+differences in forced photometry measurements were about half as big
+as the formal errors, and approximately constant across a wide range
+of fluxes.  We attribute these differences to the ``patching'' step in
+building the unWISE coadds, which naively fills in masked values in
+the L1b images with an average of neighboring unmasked pixels.  If
+instead of patching from neighboring pixels, we patch from the coadd
+(that is, patch from the mean of the other L1b images), we find that
+the L1b and coadd forced photometry results are much more consistent,
+with differences of about 10\% of the formal errors.
+
 
 
 Forced photometry assumes that the profile of a galaxy is the same
