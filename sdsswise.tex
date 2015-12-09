@@ -476,20 +476,40 @@ dozens of pixels); \thetractor\ uses \emph{Ceres Solver}
 (\citealt{agarwal}), which handles this case well, as its optimization
 engine for forced photometry.
 
-We evaluate the PSF out to a finite radius for each source based on a
-rough estimate of the source's flux.  Using this flux estimate and the
-PSF model, we compute the radius where the surface brightness drops
-below $10\%$ of the per-pixel noise, and use this as the PSF
-approximation radius.  For SDSS sources within 4 arcseconds of one or
-more WISE catalog sources, our rough flux approximation is the sum of
-WISE catalog fluxes of the nearby sources.  Finally, we apply a
-minimum radius of 3 pixels for all sources.  One might worry that
-using a different PSF approximation for different sources would
-introduce biases, but since we are performing maximum-likelihood
-fitting, clipping the PSF only determines which pixels contribute to
-the fit; it does not introduce biases for isolated sources.  Our
-photometry results for blended sources will indeed depend on the
-clipping radius chosen.
+We wish to evaluate the PSF out to a finite radius for each
+source---in this paper, the radius where the surface brightness drops
+to $10\%$ of the per-pixel noise.  However, we must choose the
+approximation radius \emph{before} we have measured the flux.  We
+therefore need a rough estimate of the WISE flux of each SDSS source.
+We do this by matching to the WISE catalog with a radius of 4
+arcseconds, and (conservatively) summing the fluxes of all nearby WISE
+sources as our estimate of the flux of each SDSS source for PSF
+truncation purposes.  We also impose a minimum approximation radius of
+3 pixels for all sources.
+%
+One might worry that using a different PSF approximation for different
+sources would introduce flux measurement biases, but since we are
+performing maximum-likelihood fitting, clipping the PSF only
+determines which pixels contribute to the fit; it does not introduce
+biases for isolated sources (in the limit that our PSF model is
+perfect).  Our photometry results for overlapping sources will indeed
+depend on the clipping radius chosen for the sources.  This is an
+effect we hope to characterize and improve in future work.
+
+% We evaluate the PSF out to a finite radius for each source based on a
+% rough estimate of the source's flux.  Using this flux estimate and the
+% PSF model, we compute the radius where the surface brightness drops
+% below $10\%$ of the per-pixel noise, and use this as the PSF
+% approximation radius.  For SDSS sources within 4 arcseconds of one or
+% more WISE catalog sources, our rough flux approximation is the sum of
+% WISE catalog fluxes of the nearby sources.  Finally, we apply a
+% minimum radius of 3 pixels for all sources.  One might worry that
+% using a different PSF approximation for different sources would
+% introduce biases, but since we are performing maximum-likelihood
+% fitting, clipping the PSF only determines which pixels contribute to
+% the fit; it does not introduce biases for isolated sources.  Our
+% photometry results for blended sources will indeed depend on the
+% clipping radius chosen.
 
 
 We photometer each WISE tile and each WISE band separately.  Since the
