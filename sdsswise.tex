@@ -103,7 +103,7 @@ by the Sloan Digital Sky Survey (SDSS; \citealt{york}).
 % the sources to best match the observed WISE images.
 %
 We use a ``forced photometry'' technique, using measured SDSS source
-positions, star--galaxy separation and galaxy profiles to define the
+positions, star--galaxy classification and galaxy profiles to define the
 sources whose fluxes are to be measured in the WISE images.
 %
 We perform photometry with \Thetractor\ image modeling code, working
@@ -112,18 +112,18 @@ function and a noise model.
 %
 The result is a measurement of the flux of each SDSS source in each
 WISE band.  Many sources have little flux in the WISE bands, so often
-the measurements we report are consistent with zero.  However, for
-many sources we get three- or four-sigma measurements; these sources
-would not be reported by the ``official'' WISE pipeline and will not
-appear in the
-WISE catalog, yet they can be highly informative for some scientific
-questions.  In addition, these small-signal measurements can be used
-in \emph{stacking} analyses at catalog level.  The forced photometry
-approach has the advantage that we measure a \emph{consistent} set of
-sources between SDSS and WISE, taking advantage of the resolution and
-depth of the SDSS images to interpret the WISE images; objects that
-are resolved in SDSS but blended together in WISE still have accurate
-measurements in our photometry.
+the measurements we report are consistent with zero given our
+uncertainties.  However, for many sources we get three- or four-sigma
+measurements; these sources would not be reported by the ``official''
+WISE pipeline and will not appear in the WISE catalog, yet they can be
+highly informative for some scientific questions.  In addition, these
+small-signal measurements can be used in \emph{stacking} analyses at
+catalog level.  The forced photometry approach has the advantage that
+we measure a \emph{consistent} set of sources between SDSS and WISE,
+taking advantage of the resolution and depth of the SDSS images to
+interpret the WISE images; objects that are resolved in SDSS but
+blended together in WISE still have accurate measurements in our
+photometry.
 %
 Our results, and the code used to produce them, are publicly available
 at \niceurl{http://unwise.me}.
@@ -210,7 +210,7 @@ $14\thou$ square degrees of sky in five bands ($u$, $g$, $r$, $i$, $z$), detecti
 measuring over $400$ million sources.  We use the imaging catalogs
 from SDSS-III Data Release 10 (\citealt{sdss3, dr10}).  These catalogs
 contain the outputs of the \emph{Photo} pipeline (\citealt{lupton}),
-and include star/galaxy separation and galaxy shape measurements using
+and include star/galaxy classification and galaxy shape measurements using
 either exponential, de Vaucouleurs, or composite (sum of exponential
 and de Vaucouleurs) profiles.
 
@@ -271,7 +271,7 @@ sources except for their fluxes in the bands of interest.  In this
 case, the photometry task becomes a linear optimization problem:
 We know what each source
 should look like in the WISE images, and we must compute the linear scalings
-of the sources that best match the observed image.
+of the source profiles that best match the observed image.
 
 
 The image calibration parameters include the astrometric calibration,
@@ -466,27 +466,33 @@ represented as mixtures of Gaussians, as described in
 \citet{profiles}, and we fit a mixture of Gaussians to the PSF model.
 The convolution is then analytic and rendering PSF-convolved galaxy
 profiles becomes a matter of evaluating a large number of Gaussians.
-In principle these Gaussian profiles have infinite extent, but we clip
-them to finite radii as described below.  Once the profile of each
-source has been rendered, forced photometry requires performing a
-linear least-squares fit for source fluxes such that their sum is
-closest to the actual image pixels, with respect to the noise model.
-This least-squares problem is very sparse (most sources touch only
-dozens of pixels); \thetractor\ uses \emph{Ceres Solver}
-(\citealt{agarwal}), which handles this case well, as its optimization
-engine for forced photometry.
+In principle these Gaussian profiles have infinite extent, but we have
+not charactized the PSF model at very large radii, and there is little
+information content beyond several times the half-light radius.  For
+these reasons, and for computational efficiency, we clip them to
+finite radii as described below.
+
+Once the profile of each source has
+been rendered, forced photometry requires performing a linear
+least-squares fit for source fluxes such that their sum is closest to
+the actual image pixels, with respect to the noise model.  This
+least-squares problem is very sparse (most sources touch only dozens
+of pixels); \thetractor\ uses \emph{Ceres Solver} (\citealt{agarwal}),
+which handles this case well, as its optimization engine for forced
+photometry.
 
 We wish to evaluate the PSF out to a finite radius for each
 source---in this paper, the radius where the surface brightness drops
 to $10\%$ of the per-pixel noise.  However, we must choose the
-approximation radius \emph{before} we have measured the flux.  We
-therefore need a rough estimate of the WISE flux of each SDSS source.
-We do this by matching to the WISE catalog with a radius of 4
-arcseconds, and (conservatively) summing the fluxes of all nearby WISE
-sources as our estimate of the flux of each SDSS source for PSF
+approximation radius \emph{before} we have measured the flux; we are
+essentially choosing which pixels we believe will be relevant in the
+fitting.  We therefore need a rough estimate of the WISE flux of each
+SDSS source.  We do this by cross-matching to the WISE catalog with a radius
+of 4 arcseconds, and (conservatively) summing the fluxes of all matched
+WISE sources as our estimate of the flux of each SDSS source for PSF
 truncation purposes.  We also impose a minimum approximation radius of
 3 pixels for all sources.
-%
+
 One might worry that using a different PSF approximation for different
 sources would introduce flux measurement biases, but since we are
 performing maximum-likelihood fitting, clipping the PSF only
@@ -532,7 +538,7 @@ Photometry took roughly $1500$ CPU-hours total.
 
 % 240 million: take AllWISE map, mask by SDSS map > 0; svn rev 25191
 
-\subsection{Comparison to WISE catalog}
+\subsection{Comparison to the WISE catalog}
 
 Comparisons between our results and the ``official'' WISE catalog are
 shown in \figurename s \ref{fig:comp}, \ref{fig:comp2},
@@ -683,16 +689,16 @@ WISE.
 
 \Figref{fig:bright} shows a comparison of the artifacts around bright
 stars in our forced-photometry results and the AllWISE catalog.  The
-most notable effect is a significant halo: sources in the SDSS catalog
-that we report as being bright.  This occurs because our PSF models
-(as shown in \figref{fig:psf}) focus on the core, largely ignoring the
-wings of the PSF.  In our forced photometry approach, when this
-unexplained flux coincides with a source, the least-squares fitter
-will try to ``explain'' the extra flux by making the source brighter.
-As a result, any source near a bright star will appear too bright in our
-results.  The examples shown in \figref{fig:bright} are among the
-brightest stars in our footprint, and for these stars the halo can be
-10 arcminutes or larger.
+most notable effect is a significant halo about bright WISE sources:
+our reported fluxes for nearby sources are too bright.  This
+occurs because our PSF models (as shown in \figref{fig:psf}) focus on
+the core, largely ignoring the wings of the PSF.  In our forced
+photometry approach, when this unexplained flux coincides with a
+source, the least-squares fitter will try to ``explain'' the extra
+flux by making the source brighter.  As a result, any source near a
+bright star will appear too bright in our results.  The examples shown
+in \figref{fig:bright} are among the brightest stars in our footprint,
+and for these stars the halo can be 10 arcminutes in radius or larger.
 
 
 
@@ -866,16 +872,17 @@ scale roughly with the number of pixels being fit, so photometering
 the individual frames would have cost roughly 30 times more.
 %
 In order to explore this decision, we ran forced photometry on the
-full set of L1b frames for a sample tile, and found that the
-differences in forced photometry measurements were about half as big
-as the formal errors, and approximately constant across a wide range
-of fluxes.  We attribute these differences to the ``patching'' step in
-building the unWISE coadds, which naively fills in masked values in
-the L1b images with an average of neighboring unmasked pixels.  If
-instead of patching from neighboring pixels, we patch from the coadd
-(that is, patch from the mean of the other L1b images), we find that
-the L1b and coadd forced photometry results are much more consistent,
-with differences of about 10\% of the formal errors.
+full set of calibrated ``level 1b'' (L1b) frames for a sample tile,
+and found that the differences in forced photometry measurements were
+about half as big as the formal errors, and approximately constant
+across a wide range of fluxes.  We attribute these differences to the
+``patching'' step in building the unWISE coadds, which naively fills
+in masked values in the L1b images with an average of neighboring
+unmasked pixels.  If instead of patching from neighboring pixels, we
+patch from the coadd (that is, patch from the mean of the other L1b
+images), we find that the L1b and coadd forced photometry results are
+much more consistent, with scatter of about 10\% of the formal
+errors.
 
 
 
@@ -1064,7 +1071,7 @@ The \filetype{photoWiseForced} files include the following columns:
   image, and should be close to unity for all sources.
 \item[\colname{w1\_proflux}] (float) profile-weighted, the amount of
   flux contributed by other nearby sources.  This will be zero for
-  isolated sources, but can be larger that \colname{w1\_nanomaggies}
+  isolated sources, but can be larger than \colname{w1\_nanomaggies}
   if this source is blended with a brighter source.
 \item[\colname{w1\_profracflux}] (float) equal to
   \colname{w1\_proflux} divided by \colname{w1\_nanomaggies}; the
@@ -1093,17 +1100,17 @@ Ahn,~C.~P. \etal, 2013, \apjs, 211, 17; \arxiv{1307.7735}
 Bovy,~J. \etal, 2012, \apj, 749, 41; \arxiv{1105.3975}
 
 \bibitem[Chen \etal(2008)]{chen}
-Chen,~X. and Wright,~E.~L., 2008, \apj 681, 747; \arxiv{0712.3594}
+Chen,~X. and Wright,~E.~L., 2008, \apj, 681, 747; \arxiv{0712.3594}
 
 % adsabs:2013AJ....145...10D
 \bibitem[Dawson \etal(2013)]{boss}
-Dawson,~K.S. \etal, 2013, \aj, 145, 10; \arxiv{1208.0022}
+Dawson,~K.~S. \etal, 2013, \aj, 145, 10; \arxiv{1208.0022}
 
 \bibitem[Dawson \etal(2015)]{dawson}
-Dawson,~K.S. \etal, 2015, \aj, in press; \arxiv{1508.04473}
+Dawson,~K.~S. \etal, 2015, \aj, in press; \arxiv{1508.04473}
 
 \bibitem[DiPompeo \etal(2015)]{dipompeo}
-DiPompeo,~M.~A. \etal, \mnras 452, 3124; \arxiv{1507.02884}
+DiPompeo,~M.~A. \etal, \mnras, 452, 3124; \arxiv{1507.02884}
 
 % adsabs:2011AJ....142...72E
 \bibitem[Eisenstein \etal(2011)]{sdss3}
@@ -1111,13 +1118,13 @@ Eisenstein,~D.~J. \etal, \aj, 142, 72; \arxiv{1101.1529}
 
 \bibitem[Hogg \& Lang(2012)]{profiles}
 %Replacing standard galaxy profiles with mixtures of Gaussians.
-Hogg,~D.W. \& Lang,~D., \pasp, 125, 719; \arxiv{1210.6563}
+Hogg,~D.~W. and Lang,~D., \pasp, 125, 719; \arxiv{1210.6563}
 
 \bibitem[Lang(2014)]{unwise}
 Lang,~D., 2014, \aj, 147, 108; \arxiv{1405.0308}
 
 \bibitem[Lawrence \etal(2007)]{lawrence}
-Lawrence,~A. \etal, 2007, MNRAS, 379, 1599; \arxiv{astro-ph/0604426}
+Lawrence,~A. \etal, 2007, \mnras, 379, 1599; \arxiv{astro-ph/0604426}
 
 \bibitem[Lupton \etal(2001)]{lupton}
 Lupton,~R.~H. \etal, ADASS X, 269; \arxiv{astro-ph/0101420}
@@ -1139,7 +1146,7 @@ Meisner,~A. and Finkbeiner,~D., \apj, 781, 5; \arxiv{1312.0947}
 Myers,~A. \etal, \apjs, 221, 27; \arxiv{1508.04472}
 
 \bibitem[Prakash \etal(2015)]{prakash}
-Prakash,~A. \etal, \apjs submitted; \arxiv{1508.04478}
+Prakash,~A. \etal, \apjs, submitted; \arxiv{1508.04478}
 
 % http://adsabs.harvard.edu/abs/2010AJ....140.1868W
 \bibitem[Wright \etal(2010)]{wright}
